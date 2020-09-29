@@ -15,16 +15,15 @@ from gensim.parsing.preprocessing import (
     strip_numeric,
 )
 
-
+# TODO have abilty to add stopwords
 my_stopwords = nltk.corpus.stopwords.words("english")
 word_rooter = nltk.stem.snowball.PorterStemmer(ignore_stopwords=False).stem
 my_punctuation = "#!\"$%&'()*+,-./:;<=>?[\\]^_`{|}~•@“…"
 
 
+# TODO have uses pass in thier own clean function?
 # cleaning master function
 def clean_text(text, bigrams=False):
-    # text = remove_users(text)
-    # text = remove_links(text)
     text = text.lower()  # lower case
     text = re.sub("[" + my_punctuation + "]+", " ", text)  # strip punctuation
     text = re.sub("\s+", " ", text)  # remove double spacing
@@ -42,32 +41,25 @@ def clean_text(text, bigrams=False):
     return text
 
 
-
-def topic_search(topicblobs,topics,topic_docs):
-
+def topic_search(topicblobs, topics, topic_docs):
 
     topic_list = set(topics.split(" "))
     docs = {}
 
     counter = 0
 
-    #print(topic_list)
-
-
     for topicblob in topicblobs:
-        
-        topic_set = set(eval(topicblob))
-        #print(topic_set)
 
+        topic_set = set(eval(topicblob))
         if topic_list.intersection(topic_set):
             topicResp = {}
             topicResp["topics"] = topicblob
             topicResp["doc"] = topic_docs[counter]
 
             docs[counter] = topicResp
-        
+
         counter += 1
-    
+
     return docs
 
 
@@ -108,24 +100,13 @@ def get_sim_docs(doc, sims):
 
 
 def do_topic_modeling(docs, num_topics, num_words):
-    # documents = df["text"].astype(str).array
 
-    # maybe make each sentence an item
-    # text = clean_text(str(text))
     topicResp = {}
-
     documents = []
-    # raw_sents = [i for i in nlp(text).sents]
-
-    # topicResp["sentences"] = raw_sents
-    # print(documents)
-
     # strip documents
 
     for doc in docs:
         documents.append(clean_text(str(doc)))
-
-    # documents = [clean_text(str(text))]
 
     # stoplist = set('for a of the and to in'.split())
     print("stopword scanning..")
@@ -134,6 +115,7 @@ def do_topic_modeling(docs, num_topics, num_words):
         for document in documents
     ]
 
+    # TODO: maybe make this a flag?
     # # remove words that appear only once
     # print("remvoing one time words ...")
     # frequency = defaultdict(int)
@@ -151,9 +133,10 @@ def do_topic_modeling(docs, num_topics, num_words):
 
     corpus_tfidf = tfidf[corpus]
 
-    lsi_model = models.LsiModel(
-        corpus_tfidf, id2word=dictionary, num_topics=num_topics
-    )  # initialize an LSI transformation
+    lsi_model = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=num_topics)
+
+    # TODO: do we need this?
+    # initialize an LSI transformation
     # corpus_lsi = lsi_model[
     #     corpus_tfidf
     # ]  # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
@@ -166,27 +149,19 @@ def do_topic_modeling(docs, num_topics, num_words):
     filters = [lambda x: x.lower(), strip_punctuation, strip_numeric]
 
     for topic in lda_topics:
-        # print(topic)
         topic_name = str(preprocess_string(topic[1], filters))
         topics[topic_name] = int(topic[0])
 
-    # print(topics)
-
     topicResp["topics"] = topics
-
-    # with open(artifacts_path + "merged/models/topics.json", "w") as outfile:
-    #     json.dump(topics, outfile)
 
     index = similarities.MatrixSimilarity(lsi_model[corpus])
     topicResp["sims"] = index
 
-    # index.save(artifacts_path + "merged/models/merged.index")
-
-    # # counter = 0
-
-    # dictionary.save(artifacts_path + "merged/models/merged_dict.pkl")
-    # lsi_model.save(artifacts_path + "merged/models/merged_model.lsi")
-    # corpora.MmCorpus.serialize(
-    #     artifacts_path + "merged/models/merged_corpus.pkl", corpus
-    # )
+    # TODO how do we want to handle saves?
+    # with open(".topicblob/topics.json", "w") as outfile:
+    #     json.dump(topics, outfile)
+    # index.save("topicblob/index.index")
+    # dictionary.save(".topicblob/dict.pkl")
+    # lsi_model.save(".topicblob/model.lsi")
+    # corpora.MmCorpus.serialize(".topicblob/corpus.pkl", corpus)
     return topicResp
