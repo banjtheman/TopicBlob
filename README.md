@@ -6,7 +6,6 @@ TopicBlob: Simplified Topic Modeling
 `TopicBlob` is a Python 3 library for processing textual data. It provides a simple API for diving into common natural language processing (NLP) taks around topic modeling such as finding similar documents and provide a list of topics givne input text.
 
 
-
 ```
     from topicblob import TopicBlob
   
@@ -24,30 +23,21 @@ TopicBlob: Simplified Topic Modeling
     tb.sims # {0: 1.0, 1: 0.0} TODO: get better examples
   ```  
 
-
 TopicBlob leverages  `NLTK` and `gensim` , for the heavy lifting
 
 Features
 --------
 
-- Noun phrase extraction
-- Part-of-speech tagging
-- Sentiment analysis
-- Classification (Naive Bayes, Decision Tree)
-- Tokenization (splitting text into words and sentences)
-- Word and phrase frequencies
-- Parsing
-- `n`-grams
-- Word inflection (pluralization and singularization) and lemmatization
-- Spelling correction
-- Add new models or languages through extensions
-- WordNet integration
+- Topic Extraction
+- Similarity Search
+- BM25 search ( word ranking search)
+- Topic Search
 
 Get it now
 ----------
-
+    #TODO push to pip
     $ git clone https://github.com/banjtheman/TopicBlob/
-    $ pip install --editable .
+    $ pip install --editable . 
 
 Requirements
 ------------
