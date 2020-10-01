@@ -15,10 +15,14 @@ from gensim.parsing.preprocessing import (
     strip_numeric,
 )
 
+from stop_words import get_stop_words
+
+
 # TODO have abilty to add stopwords
 my_stopwords = nltk.corpus.stopwords.words("english")
+my_stopwords.extend(get_stop_words("english"))
 word_rooter = nltk.stem.snowball.PorterStemmer(ignore_stopwords=False).stem
-my_punctuation = "#!\"$%&'()*+,-./:;<=>?[\\]^_`{|}~•@“…"
+my_punctuation = "#!\"$%&'()*+,-./:;<=>?[\\]^_`{|}~•@“…ə"
 
 
 # TODO have uses pass in thier own clean function?
@@ -41,50 +45,51 @@ def clean_text(text, bigrams=False):
     return text
 
 
-def topic_search(topicblobs, topics, topic_docs):
+def topic_search(topicblobs, topics):
 
     topic_list = set(topics.split(" "))
-    docs = {}
+    docs = []
 
-    counter = 0
+    for key in topicblobs.blobs.keys():
+        topicblob = topicblobs.blobs[key]
 
-    for topicblob in topicblobs:
-
-        topic_set = set(eval(topicblob))
+        topic_set = set(eval(topicblob["topics"]))
         if topic_list.intersection(topic_set):
-            topicResp = {}
-            topicResp["topics"] = topicblob
-            topicResp["doc"] = topic_docs[counter]
-
-            docs[counter] = topicResp
-
-        counter += 1
+            docs.append(topicblob)
 
     return docs
 
 
 def ranked_search(query, docs):
 
-    tokenized_corpus = [doc.split(" ") for doc in docs]
+    corpus_docs = []
+    #TODO: get whole topicblob obj?
+    for key in docs:
+        corpus_docs.append(docs[key]["doc"])
+
+    tokenized_corpus = [doc.split(" ") for doc in corpus_docs]
     bm25 = BM25Okapi(tokenized_corpus)
     tokenized_query = query.split(" ")
-    doc_scores = bm25.get_scores(tokenized_query)
 
-    searchResp = {}
+    return bm25.get_top_n(tokenized_query, corpus_docs)
+    # print(bm25.get_top_n(tokenized_query, corpus_docs))
+    # counter = 0
+    # doc_scores = bm25.get_scores(tokenized_query)
 
-    counter = 0
+    # searchResp = {}
+    # for score in doc_scores:
+    #     searchResp[counter] = score
+    #     counter += 1
 
-    for score in doc_scores:
-        searchResp[counter] = score
-        counter += 1
+    # # sort by highest
+    # sorted_scores = {
+    #     k: v
+    #     for k, v in sorted(searchResp.items(), reverse=True, key=lambda item: item[1])
+    # }
 
-    # sort by highest
-    sorted_scores = {
-        k: v
-        for k, v in sorted(searchResp.items(), reverse=True, key=lambda item: item[1])
-    }
+    # return blob object
 
-    return sorted_scores
+    # return sorted_scores
 
 
 def get_sim_docs(doc, sims):
@@ -103,13 +108,16 @@ def do_topic_modeling(docs, num_topics, num_words):
 
     topicResp = {}
     documents = []
+    doc_keys = {}
     # strip documents
 
     for doc in docs:
-        documents.append(clean_text(str(doc)))
+        cleaned_doc = clean_text(str(doc))
+        documents.append(cleaned_doc)
+        # TODO: find better way to store this data
+        doc_keys[cleaned_doc] = doc
 
     # stoplist = set('for a of the and to in'.split())
-    print("stopword scanning..")
     texts = [
         [word for word in document.lower().split() if word not in my_stopwords]
         for document in documents
@@ -125,23 +133,31 @@ def do_topic_modeling(docs, num_topics, num_words):
 
     # texts = [[token for token in text if frequency[token] > 1] for text in texts]
 
-    print("Init model")
+    # print("Init model")
     dictionary = corpora.Dictionary(texts)
     corpus = [dictionary.doc2bow(text) for text in texts]
 
     tfidf = models.TfidfModel(corpus)  # step 1 -- initialize a model
-
     corpus_tfidf = tfidf[corpus]
-
     lsi_model = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=num_topics)
 
     # TODO: do we need this?
     # initialize an LSI transformation
-    # corpus_lsi = lsi_model[
-    #     corpus_tfidf
-    # ]  # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
+    corpus_lsi = lsi_model[
+        corpus_tfidf
+    ]  # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
 
-    print("Model done")
+    # print("Model done")
+    topic_blob = {}
+    # doc_list = []
+    for doc, as_text in zip(corpus_lsi, documents):
+        topic_blob[doc[0][0]] = {}
+        topic_blob[doc[0][0]]["doc"] = doc_keys[as_text]
+        #print(doc,as_text)
+        #print(doc_keys[as_text])
+        # doc_list.append(doc_keys[as_text])
+
+    # topicResp["docs"] = doc_list
 
     lda_topics = lsi_model.show_topics(num_words=num_words)
 
@@ -149,13 +165,33 @@ def do_topic_modeling(docs, num_topics, num_words):
     filters = [lambda x: x.lower(), strip_punctuation, strip_numeric]
 
     for topic in lda_topics:
-        topic_name = str(preprocess_string(topic[1], filters))
+        try:
+            print(topic)
+        except Exception as error:
+            print(error)
+        try:
+            topic_name = str(preprocess_string(topic[1], filters))
+        except Exception as error:
+            print(error)
+            topic_name = str(topic[1])
+
+
         topics[topic_name] = int(topic[0])
+
+        topic_blob[int(topic[0])]["topics"] = topic_name
 
     topicResp["topics"] = topics
 
+    print(topic_blob)
+
     index = similarities.MatrixSimilarity(lsi_model[corpus])
     topicResp["sims"] = index
+
+    topicResp["topic_blobs"] = topic_blob
+
+    # index_list = list(index)
+    # for indj in index_list:
+    #     print(indj)
 
     # TODO how do we want to handle saves?
     # with open(".topicblob/topics.json", "w") as outfile:

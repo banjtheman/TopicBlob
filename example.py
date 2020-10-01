@@ -5,16 +5,14 @@ text1 = "The titular threat of The Blob has always struck me as the ultimate mov
 
 text2 = "Myeloid derived suppressor cells (MDSC) are immature myeloid cells with immunosuppressive activity. They accumulate in tumor-bearing mice and humans with different types of cancer, including hepatocellular carcinoma (HCC)."
 
-
 docs = [text1, text2]
-
 
 def main():
     tb = TopicBlob(docs, 5, 5)
 
-    print(tb.docs)
-    print(tb.topics)
-    print(tb.sims)
+
+    print(tb.blobs[0]["doc"])
+    print(tb.blobs[1]["doc"])
 
     # show sim docs
     sims = tb.get_sim(0)
