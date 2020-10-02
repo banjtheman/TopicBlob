@@ -181,7 +181,6 @@ def do_topic_modeling(docs, num_topics, num_words):
         topic_blob[int(topic[0])]["topics"] = topic_name
 
     topicResp["topics"] = topics
-
     print(topic_blob)
 
     index = similarities.MatrixSimilarity(lsi_model[corpus])
