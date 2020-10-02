@@ -1,3 +1,4 @@
 gensim
 nltk
 rank_bm25
+stop-words
