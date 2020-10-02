@@ -16,6 +16,7 @@ from gensim.parsing.preprocessing import (
 )
 
 from stop_words import get_stop_words
+from operator import itemgetter
 
 
 # TODO have abilty to add stopwords
@@ -60,18 +61,23 @@ def topic_search(topicblobs, topics):
     return docs
 
 
-def ranked_search(query, docs):
+def ranked_search(query: str, blobs: dict):
+    corpus_docs = [blob["doc"] for blob in blobs.values()]
+    tokenized_corpus = [doc.split() for doc in corpus_docs]
 
-    corpus_docs = []
-    #TODO: get whole topicblob obj?
-    for key in docs:
-        corpus_docs.append(docs[key]["doc"])
-
-    tokenized_corpus = [doc.split(" ") for doc in corpus_docs]
+    # TODO: Add option for tokenizer
+    # See https://github.com/dorianbrown/rank_bm25/blob/master/rank_bm25.py
     bm25 = BM25Okapi(tokenized_corpus)
-    tokenized_query = query.split(" ")
+    tokenized_query = query.split()
 
-    return bm25.get_top_n(tokenized_query, corpus_docs)
+    # enumerate adds index of element in scores list
+    doc_scores = enumerate(bm25.get_scores(tokenized_query))
+    sorted_scores = sorted(doc_scores, key=itemgetter(1), reverse=True)
+    sorted_scores_index = [i for i, score in sorted_scores]
+
+    sorted_blobs = [blobs.get(i) for i in sorted_scores_index]
+    return sorted_blobs
+
     # print(bm25.get_top_n(tokenized_query, corpus_docs))
     # counter = 0
     # doc_scores = bm25.get_scores(tokenized_query)
