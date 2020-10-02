@@ -7,9 +7,9 @@ text2 = "Myeloid derived suppressor cells (MDSC) are immature myeloid cells with
 
 docs = [text1, text2]
 
+
 def main():
     tb = TopicBlob(docs, 5, 5)
-
 
     print(tb.blobs[0]["doc"])
     print(tb.blobs[1]["doc"])

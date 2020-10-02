@@ -159,8 +159,8 @@ def do_topic_modeling(docs, num_topics, num_words):
     for doc, as_text in zip(corpus_lsi, documents):
         topic_blob[doc[0][0]] = {}
         topic_blob[doc[0][0]]["doc"] = doc_keys[as_text]
-        #print(doc,as_text)
-        #print(doc_keys[as_text])
+        # print(doc,as_text)
+        # print(doc_keys[as_text])
         # doc_list.append(doc_keys[as_text])
 
     # topicResp["docs"] = doc_list
@@ -180,7 +180,6 @@ def do_topic_modeling(docs, num_topics, num_words):
         except Exception as error:
             print(error)
             topic_name = str(topic[1])
-
 
         topics[topic_name] = int(topic[0])
 
