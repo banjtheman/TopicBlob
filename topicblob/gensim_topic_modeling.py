@@ -192,6 +192,7 @@ def do_topic_modeling(docs: List[str], num_topics: int, num_words: int, extra_st
 
         topics[topic_name] = int(topic[0])
 
+        topic_blob[int(topic[0])] = topic_blob[0]
         topic_blob[int(topic[0])]["topics"] = topic_name
 
     topicResp["topics"] = topics
