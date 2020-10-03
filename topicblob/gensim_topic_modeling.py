@@ -35,7 +35,7 @@ def compile_list_of_stopwords(extra: List[str] = None):
 
 # TODO have uses pass in thier own clean function?
 # cleaning master function
-def clean_text(text, my_stopwords, bigrams=False):
+def clean_text(text: str, my_stopwords: List[str], bigrams: bool = False):
     text = text.lower()  # lower case
     text = re.sub("[" + my_punctuation + "]+", " ", text)  # strip punctuation
     text = re.sub("\s+", " ", text)  # remove double spacing
