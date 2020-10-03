@@ -164,10 +164,12 @@ def do_topic_modeling(docs: List[str], num_topics: int, num_words: int, extra_st
 
     # print("Model done")
     topic_blob = {}
+    i = 0
     # doc_list = []
     for doc, as_text in zip(corpus_lsi, documents):
-        topic_blob[doc[0][0]] = {}
-        topic_blob[doc[0][0]]["doc"] = doc_keys[as_text]
+        topic_blob[i] = {}
+        topic_blob[i]["doc"] = doc_keys[as_text]
+        i += 1
         # print(doc,as_text)
         # print(doc_keys[as_text])
         # doc_list.append(doc_keys[as_text])
@@ -175,7 +177,6 @@ def do_topic_modeling(docs: List[str], num_topics: int, num_words: int, extra_st
     # topicResp["docs"] = doc_list
 
     lda_topics = lsi_model.show_topics(num_words=num_words)
-
     topics = {}
     filters = [lambda x: x.lower(), strip_punctuation, strip_numeric]
 
@@ -191,8 +192,6 @@ def do_topic_modeling(docs: List[str], num_topics: int, num_words: int, extra_st
             topic_name = str(topic[1])
 
         topics[topic_name] = int(topic[0])
-
-        topic_blob[int(topic[0])] = topic_blob[0]
         topic_blob[int(topic[0])]["topics"] = topic_name
 
     topicResp["topics"] = topics
