@@ -1,6 +1,7 @@
 import logging
 import re
 from collections import defaultdict
+from typing import List
 
 
 from rank_bm25 import BM25Okapi
@@ -19,16 +20,22 @@ from stop_words import get_stop_words
 from operator import itemgetter
 
 
-# TODO have abilty to add stopwords
-my_stopwords = nltk.corpus.stopwords.words("english")
-my_stopwords.extend(get_stop_words("english"))
 word_rooter = nltk.stem.snowball.PorterStemmer(ignore_stopwords=False).stem
 my_punctuation = "#!\"$%&'()*+,-./:;<=>?[\\]^_`{|}~•@“…ə"
 
 
+def compile_list_of_stopwords(extra: List[str] = None):
+    my_stopwords = nltk.corpus.stopwords.words("english")
+    my_stopwords.extend(get_stop_words("english"))
+    # If a list of extra stopwords is passed in, extend the list.
+    if extra:
+        my_stopwords.extend(extra)
+    return list(set(my_stopwords))
+
+
 # TODO have uses pass in thier own clean function?
 # cleaning master function
-def clean_text(text, bigrams=False):
+def clean_text(text, my_stopwords, bigrams=False):
     text = text.lower()  # lower case
     text = re.sub("[" + my_punctuation + "]+", " ", text)  # strip punctuation
     text = re.sub("\s+", " ", text)  # remove double spacing
@@ -110,15 +117,17 @@ def get_sim_docs(doc, sims):
     return simResp
 
 
-def do_topic_modeling(docs, num_topics, num_words):
+def do_topic_modeling(docs: List[str], num_topics: int, num_words: int, extra_stop_words: List[str] = None):
 
     topicResp = {}
     documents = []
     doc_keys = {}
     # strip documents
 
+    my_stopwords = compile_list_of_stopwords(extra=extra_stop_words)
+
     for doc in docs:
-        cleaned_doc = clean_text(str(doc))
+        cleaned_doc = clean_text(str(doc), my_stopwords)
         documents.append(cleaned_doc)
         # TODO: find better way to store this data
         doc_keys[cleaned_doc] = doc
