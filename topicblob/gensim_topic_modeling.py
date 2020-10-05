@@ -64,10 +64,11 @@ def ranked_search(query, docs):
 
     corpus_docs = []
     #TODO: get whole topicblob obj?
-    for key in docs:
+    for key in docs.keys():
         corpus_docs.append(docs[key]["doc"])
+    print(corpus_docs)
 
-    tokenized_corpus = [doc.split(" ") for doc in corpus_docs]
+    tokenized_corpus = [doc[0].split(" ") for doc in corpus_docs]
     bm25 = BM25Okapi(tokenized_corpus)
     tokenized_query = query.split(" ")
 

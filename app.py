@@ -4,11 +4,12 @@ from SessionState import SessionState
 import pandas as pd
 
 
-session_state = SessionState.get(run_doclist=False, define_parameters=False, run_topicblob=False)
+session_state = SessionState.get(run_doclist=False, define_parameters=False, run_topicblob=False, topicblob=None)
 def rerun():
     session_state.run_doclist = False
     session_state.define_parameters = False
     session_state.run_topicblob = False
+    session_state.topicblob = None
 
 if st.button('Rerun'):
     rerun()
@@ -34,8 +35,10 @@ if session_state.run_doclist:
         session_state.define_parameters = define_function_parameters 
     if session_state.define_parameters:
 
-        tb = TopicBlob(docs, num_topics, num_words)
-        topics = [topic for blob in tb.blobs.values() for topic in eval(blob['topics'])]
+        if session_state.topicblob is None:
+            session_state.topicblob = TopicBlob(docs, num_topics, num_words)
+        
+        topics = [topic for blob in session_state.topicblob.blobs.values() for topic in eval(blob['topics'])]
 
         if search_docs_topics:
             st.subheader('Search docs by topics')
@@ -57,15 +60,24 @@ if session_state.run_doclist:
 
     if session_state.run_topicblob:
         if get_topics:
-            st.text(topics)
+            st.subheader('Topics')
+            st.table(pd.DataFrame([[index, blob['topics']] for index, blob in enumerate(session_state.topicblob.blobs.values())],
+                        columns=['Index', 'Topics']).set_index('Index', drop=True))
 
         if search_docs_topics:
-            topic_search = tb.search_docs_by_topics(search_topic)
+            topic_search = session_state.topicblob.search_docs_by_topics(search_topic)
+            st.subheader('Similar docs by topic')
+            st.table(pd.DataFrame([[list(doc.values())[0][0], list(doc.values())[1]] for doc in  topic_search],
+                     columns=['Docs', 'Topics']))
 
         if ranked_search_docs_words:
-            search = tb.ranked_search_docs_by_words(word_input_ranked_search)
+            search = session_state.topicblob.ranked_search_docs_by_words(word_input_ranked_search)
+            st.subheader('Ranked Search')
+            st.table(pd.DataFrame(search, columns=['Docs']))
             
         if find_similar_docs:
-            sims = tb.get_sim(index_sim)
-            for sim in sims.keys():
-                print(tb.get_doc(sim))
+            sims = session_state.topicblob.get_sim(index_sim)
+            st.subheader('Similarity Docs by index')
+            st.text('Search index: ' + str(index_sim))
+            st.table(pd.DataFrame([[key, value] for key, value in sims.items()],
+                     columns=['Index', 'Similarity']).sort_values(by='Similarity', ascending=False))
