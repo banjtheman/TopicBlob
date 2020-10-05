@@ -79,8 +79,9 @@ def get_requirements_from_packages(packages):
         requirement_files = get_requirements_files_in_package_dir(package_dir)
 
         for requirement_file in requirement_files:
-            package_requirements =\
-                get_requirements_from_file(python_requirements_file=requirement_file)
+            package_requirements = get_requirements_from_file(
+                python_requirements_file=requirement_file
+            )
             requirements = requirements + package_requirements
 
     return list(set(requirements))
@@ -147,10 +148,7 @@ def main():
     # Get Packages
     packages = find_packages(exclude=("testing",))
     install_packages = [
-        package
-        for package
-        in packages
-        if not package.endswith(".tests")
+        package for package in packages if not package.endswith(".tests")
     ]
     test_packages = [package for package in packages if package.endswith(".tests")]
 
@@ -185,7 +183,7 @@ def main():
         install_requires=install_requirements,
         keywords=["python", "topic modeling", "gensim", "nlp", "spacy"],
         long_description=readme,
-        long_description_content_type='text/markdown',
+        long_description_content_type="text/markdown",
         name="topicblob",
         packages=packages,
         project_urls={},
