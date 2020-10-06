@@ -35,7 +35,7 @@ def main():
     print(search)
 
     print("#################Topic Search EXAMPLE##################")
-    print("Doing topic search for the word 'social'")
+    print("Doing topic search for the word 'python'")
     topic_search = tb.search_docs_by_topics("python")
     print(topic_search)
 
