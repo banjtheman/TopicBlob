@@ -20,18 +20,18 @@ class TopicBlob:
         except Exception as error:
             logging.error(error)
 
-        self.blobs = topicResp["topic_blobs"]
+        self.df = topicResp["df"]
         # self.docs = topicResp["docs"]
         self.sims = topicResp["sims"]
 
     def get_sim(self, doc_index):
-        return get_sim_docs(doc_index, self.sims)
+        return get_sim_docs(doc_index, self.sims, self.df)
 
     def get_doc(self, doc_index):
-        return self.blobs[doc_index]["doc"]
+        return self.df.iloc[doc_index]
 
     def search_docs_by_topics(self, topics):
-        return topic_search(self, topics)
+        return topic_search(self.df, topics)
 
     def ranked_search_docs_by_words(self, words):
-        return ranked_search(words, self.blobs)
+        return ranked_search(words, self.df)

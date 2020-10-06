@@ -27,8 +27,7 @@ def main():
     print("#################Sims EXAMPLE##################")
     print("Showing sim docs for doc number 0 *Facebook")
     sims = tb.get_sim(0)
-    for sim in sims.keys():
-        print(tb.get_doc(sim))
+    print(sims)
 
     print("#################Ranked Search EXAMPLE##################")
     print("Doing ranked search for the word 'president'")
@@ -37,7 +36,7 @@ def main():
 
     print("#################Topic Search EXAMPLE##################")
     print("Doing topic search for the word 'social'")
-    topic_search = tb.search_docs_by_topics("social")
+    topic_search = tb.search_docs_by_topics("python")
     print(topic_search)
 
 
