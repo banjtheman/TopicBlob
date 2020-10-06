@@ -2,8 +2,8 @@ import logging
 import re
 from collections import defaultdict
 from typing import List
-
-
+from pprint import pprint
+import pandas as pd
 from rank_bm25 import BM25Okapi
 import nltk
 from gensim import corpora
@@ -22,6 +22,9 @@ from operator import itemgetter
 
 word_rooter = nltk.stem.snowball.PorterStemmer(ignore_stopwords=False).stem
 my_punctuation = "#!\"$%&'()*+,-./:;<=>?[\\]^_`{|}~•@“…ə"
+logging.basicConfig(
+    format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
+)
 
 
 def compile_list_of_stopwords(extra: List[str] = None):
@@ -53,55 +56,100 @@ def clean_text(text: str, my_stopwords: List[str], bigrams: bool = False):
     return text
 
 
-def topic_search(topicblobs, topics):
+def check_topic_set(row, topic_list):
+    topic_set = set(row["Topics"])
+    if topic_list.intersection(topic_set):
+        return True
+    else:
+        return False
 
+
+def topic_search(df, topics):
     topic_list = set(topics.split(" "))
-    docs = []
-
-    for key in topicblobs.blobs.keys():
-        topicblob = topicblobs.blobs[key]
-
-        topic_set = set(eval(topicblob["topics"]))
-        if topic_list.intersection(topic_set):
-            docs.append(topicblob)
-
-    return docs
+    df_mask = df.apply(lambda row: check_topic_set(row, topic_list), axis=1)
+    df = df[df_mask]
+    return df
 
 
-def ranked_search(query: str, blobs: dict):
-    corpus_docs = [blob["doc"] for blob in blobs.values()]
+def add_ranked_score(row, doc_scores):
+    doc_score = doc_scores[row["Document_No"]]
+    return doc_score
+
+
+def ranked_search(query: str, df: pd.DataFrame):
+    corpus_docs = list(
+        df["Original Text"]
+    )  # [df["Cleaned Text"] for blob in blobs.values()]
+
     tokenized_corpus = [doc.split() for doc in corpus_docs]
-
-    # corpus_docs = []
-    # for key in docs.keys():
-    #     corpus_docs.append(docs[key]["doc"])
-    # print(corpus_docs)
-
-    tokenized_corpus = [doc[0].split(" ") for doc in corpus_docs]
+    # tokenized_corpus = [doc[0].split(" ") for doc in corpus_docs]
     # TODO: Add option for tokenizer
     # See https://github.com/dorianbrown/rank_bm25/blob/master/rank_bm25.py
     bm25 = BM25Okapi(tokenized_corpus)
+
+    # print(tokenized_corpus)
     tokenized_query = query.split()
 
+    # print(tokenized_query)
+
     # enumerate adds index of element in scores list
-    doc_scores = enumerate(bm25.get_scores(tokenized_query))
-    sorted_scores = sorted(doc_scores, key=itemgetter(1), reverse=True)
-    sorted_scores_index = [i for i, score in sorted_scores]
+    doc_scores = bm25.get_scores(tokenized_query)
 
-    sorted_blobs = [blobs.get(i) for i in sorted_scores_index]
-    return sorted_blobs
+    df["ranked_score"] = df.apply(lambda row: add_ranked_score(row, doc_scores), axis=1)
+    df = df.sort_values("ranked_score", ascending=False)
+
+    # sorted_blobs = [blobs.get(i) for i in sorted_scores_index]
+    return df
 
 
-def get_sim_docs(doc, sims):
+def add_sim(row, sim_list):
+    sim_score = sim_list[row["Document_No"]]
+    return sim_score
+
+
+def add_sim_doc(row, doc):
+    return doc
+
+
+def get_sim_docs(doc, sims, df):
 
     sim_list = list(sims)[doc]
-    simResp = {}
 
-    sorted_sim = sorted(enumerate(sim_list), key=lambda x: x[1], reverse=True)
-    for sim in sorted_sim:
-        simResp[sim[0]] = sim[1]
-    # print(simResp)
-    return simResp
+    df["sim_score"] = df.apply(lambda row: add_sim(row, sim_list), axis=1)
+    df["sim_to_doc"] = df.apply(lambda row: add_sim_doc(row, doc), axis=1)
+
+    df = df.sort_values("sim_score", ascending=False)
+    return df
+
+
+def format_topics_sentences(ldamodel, corpus, texts, og_docs):
+    # Init output
+    sent_topics_df = pd.DataFrame()
+
+    # Get main topic in each document
+    for i, row_list in enumerate(ldamodel[corpus]):
+        row = row_list[0] if ldamodel.per_word_topics else row_list
+        # print(row)
+        row = sorted(row, key=lambda x: (x[1]), reverse=True)
+        # Get the Dominant topic, Perc Contribution and Keywords for each document
+        for j, (topic_num, prop_topic) in enumerate(row):
+            if j == 0:  # => dominant topic
+                wp = ldamodel.show_topic(topic_num)
+                topic_keywords = ", ".join([word for word, prop in wp])
+                topic_keywords = topic_keywords.split(", ")
+                sent_topics_df = sent_topics_df.append(
+                    pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]),
+                    ignore_index=True,
+                )
+            else:
+                break
+    sent_topics_df.columns = ["Dominant_Topic", "Perc_Contribution", "Topic_Keywords"]
+
+    # Add original text to the end of the output
+    contents = pd.Series(texts)
+    og_docs_df = pd.Series(og_docs)
+    sent_topics_df = pd.concat([sent_topics_df, contents, og_docs_df], axis=1)
+    return sent_topics_df
 
 
 def do_topic_modeling(
@@ -112,8 +160,17 @@ def do_topic_modeling(
     documents = []
     doc_keys = {}
     # strip documents
-
     my_stopwords = compile_list_of_stopwords(extra=extra_stop_words)
+
+    # TODO: maybe make this a flag?
+    # # remove words that appear only once
+    # print("remvoing one time words ...")
+    # frequency = defaultdict(int)
+    # for text in texts:
+    #     for token in text:
+    #         frequency[token] += 1
+
+    # texts = [[token for token in text if frequency[token] > 1] for text in texts]
 
     for doc in docs:
         cleaned_doc = clean_text(str(doc), my_stopwords)
@@ -127,73 +184,43 @@ def do_topic_modeling(
         for document in documents
     ]
 
-    # TODO: maybe make this a flag?
-    # # remove words that appear only once
-    # print("remvoing one time words ...")
-    # frequency = defaultdict(int)
-    # for text in texts:
-    #     for token in text:
-    #         frequency[token] += 1
-
-    # texts = [[token for token in text if frequency[token] > 1] for text in texts]
-
-    # print("Init model")
     dictionary = corpora.Dictionary(texts)
     corpus = [dictionary.doc2bow(text) for text in texts]
+
+    lda_model = models.ldamodel.LdaModel(
+        corpus=corpus,
+        id2word=dictionary,
+        num_topics=num_topics,
+        random_state=100,
+        update_every=1,
+        chunksize=10,
+        passes=10,
+        alpha="symmetric",
+        iterations=100,
+        per_word_topics=True,
+    )
+
+    pprint(lda_model.print_topics())
+    df_topic_sents_keywords = format_topics_sentences(
+        ldamodel=lda_model, corpus=corpus, texts=texts, og_docs=docs
+    )
+    df_dominant_topic = df_topic_sents_keywords.reset_index()
+    df_dominant_topic.columns = [
+        "Document_No",
+        "Dominant_Topic",
+        "Topic_Perc_Contrib",
+        "Topics",
+        "Cleaned Text",
+        "Original Text",
+    ]
 
     tfidf = models.TfidfModel(corpus)  # step 1 -- initialize a model
     corpus_tfidf = tfidf[corpus]
     lsi_model = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=num_topics)
-
-    # TODO: do we need this?
-    # initialize an LSI transformation
-    corpus_lsi = lsi_model[
-        corpus_tfidf
-    ]  # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
-
-    # print("Model done")
-    topic_blob = {}
-    i = 0
-    # doc_list = []
-    for doc, as_text in zip(corpus_lsi, documents):
-        topic_blob[i] = {}
-        topic_blob[i]["doc"] = doc_keys[as_text]
-        i += 1
-        # print(doc,as_text)
-        # print(doc_keys[as_text])
-        # doc_list.append(doc_keys[as_text])
-
-    # topicResp["docs"] = doc_list
-
-    lda_topics = lsi_model.show_topics(num_words=num_words)
-    topics = {}
-    filters = [lambda x: x.lower(), strip_punctuation, strip_numeric]
-
-    for topic in lda_topics:
-        try:
-            print(topic)
-        except Exception as error:
-            print(error)
-        try:
-            topic_name = str(preprocess_string(topic[1], filters))
-        except Exception as error:
-            print(error)
-            topic_name = str(topic[1])
-
-        topics[topic_name] = int(topic[0])
-        topic_blob[int(topic[0])]["topics"] = topic_name
-
-    topicResp["topics"] = topics
-    print(topic_blob)
-
     index = similarities.MatrixSimilarity(lsi_model[corpus])
+
     topicResp["sims"] = index
-
-    topicResp["topic_blobs"] = topic_blob
-
-    # index_list = list(index)
-    # for indj in index_list:
-    #     print(indj)
+    topicResp["df"] = df_dominant_topic
 
     # TODO how do we want to handle saves?
     # with open(".topicblob/topics.json", "w") as outfile:
@@ -202,4 +229,5 @@ def do_topic_modeling(
     # dictionary.save(".topicblob/dict.pkl")
     # lsi_model.save(".topicblob/model.lsi")
     # corpora.MmCorpus.serialize(".topicblob/corpus.pkl", corpus)
+
     return topicResp
