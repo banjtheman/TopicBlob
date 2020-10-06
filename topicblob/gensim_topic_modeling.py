@@ -72,6 +72,13 @@ def ranked_search(query: str, blobs: dict):
     corpus_docs = [blob["doc"] for blob in blobs.values()]
     tokenized_corpus = [doc.split() for doc in corpus_docs]
 
+    corpus_docs = []
+    #TODO: get whole topicblob obj?
+    for key in docs.keys():
+        corpus_docs.append(docs[key]["doc"])
+    print(corpus_docs)
+
+    tokenized_corpus = [doc[0].split(" ") for doc in corpus_docs]
     # TODO: Add option for tokenizer
     # See https://github.com/dorianbrown/rank_bm25/blob/master/rank_bm25.py
     bm25 = BM25Okapi(tokenized_corpus)
@@ -195,7 +202,6 @@ def do_topic_modeling(docs: List[str], num_topics: int, num_words: int, extra_st
         topic_blob[int(topic[0])]["topics"] = topic_name
 
     topicResp["topics"] = topics
-
     print(topic_blob)
 
     index = similarities.MatrixSimilarity(lsi_model[corpus])
