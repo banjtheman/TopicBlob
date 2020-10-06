@@ -7,21 +7,51 @@ TopicBlob: Simplified Topic Modeling
 
 
 ```
-    from topicblob import TopicBlob
-  
-    text1 = "The titular threat of The Blob has always struck me as the ultimate moviemonster: an insatiably hungry, amoeba-like mass able to penetrate virtually any safeguard, capable of as a doomed doctor chillingly describes it assimilating flesh on contact. Snide comparisons to gelatin be damned, it's a concept with the most devastating of potential consequences, not unlike the grey goo scenario proposed by technological theorists fearful of artificial intelligence run rampant."
+import wikipedia
+from topicblob import TopicBlob
 
-    text2 = "Myeloid derived suppressor cells (MDSC) are immature myeloid cells with immunosuppressive activity. They accumulate in tumor-bearing mice and humans with different types of cancer, including hepatocellular carcinoma (HCC)."
-    
-    
-    docs = [text1, text2]
-    
-    
-    tb = TopicBlob(docs, 5, 5)
-    tb.topics # {"['able', 'grey', 'capable', 'gelatin', 'titular']": 0, "['cells', 'myeloid', 'immunosuppressive', 'suppressor', 'hepatocellular']": 1}
-    
-    tb.sims # {0: 1.0, 1: 0.0} TODO: get better examples
-  ```  
+
+# get random wikipeida summaries
+
+wiki_pages = [
+    "Facebook",
+    "New York City",
+    "Barack Obama",
+    "Wikipedia",
+    "Topic Modeling",
+    "Python (programming language)",
+    "Snapchat",
+]
+
+
+def main():
+    texts = []
+    for page in wiki_pages:
+        text = wikipedia.summary(page)
+        # print(text)
+        texts.append(text)
+
+    tb = TopicBlob(texts, 5, 5)
+
+    print("#################Sims EXAMPLE##################")
+    print("Showing sim docs for doc number 0 *Facebook")
+    sims = tb.get_sim(0)
+    print(sims)
+
+    print("#################Ranked Search EXAMPLE##################")
+    print("Doing ranked search for the word 'president'")
+    search = tb.ranked_search_docs_by_words("president")
+    print(search)
+
+    print("#################Topic Search EXAMPLE##################")
+    print("Doing topic search for the word 'social'")
+    topic_search = tb.search_docs_by_topics("python")
+    print(topic_search)
+
+if __name__ == "__main__":
+    main()
+
+```  
 
 TopicBlob leverages  `NLTK` and `gensim` , for the heavy lifting
 
