@@ -3,7 +3,7 @@ import re
 from collections import defaultdict
 from typing import List
 
-
+import pandas as pd
 from rank_bm25 import BM25Okapi
 import nltk
 from gensim import corpora
@@ -22,6 +22,9 @@ from operator import itemgetter
 
 word_rooter = nltk.stem.snowball.PorterStemmer(ignore_stopwords=False).stem
 my_punctuation = "#!\"$%&'()*+,-./:;<=>?[\\]^_`{|}~•@“…ə"
+logging.basicConfig(
+    format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
+)
 
 
 def compile_list_of_stopwords(extra: List[str] = None):
@@ -60,8 +63,8 @@ def topic_search(topicblobs, topics):
 
     for key in topicblobs.blobs.keys():
         topicblob = topicblobs.blobs[key]
+        topic_set = set(topicblob["topics"])
 
-        topic_set = set(eval(topicblob["topics"]))
         if topic_list.intersection(topic_set):
             docs.append(topicblob)
 
@@ -102,6 +105,40 @@ def get_sim_docs(doc, sims):
         simResp[sim[0]] = sim[1]
     # print(simResp)
     return simResp
+
+
+def format_topics_sentences_lsi(LsiModel, corpus, topic_blob):
+    """
+    Extract all the information needed such as most predominant topic assigned to document and percentage of contribution
+    LsiModel= model to be used
+    corpus = corpus to be used
+    texts = original text to be classify (for topic assignment)
+    """
+    # Init output
+    sent_topics_df = pd.DataFrame()
+
+    # Get main topic in each document
+    doc_counter = 0
+    for i, row in enumerate(LsiModel[corpus]):
+        row = sorted(row, key=lambda x: (x[1]), reverse=True)
+        # Get the Dominant topic, Perc Contribution and Keywords for each document
+        for j, (topic_num, prop_topic) in enumerate(row):
+            if j == 0:  # => dominant topic
+                wp = LsiModel.show_topic(topic_num)
+                topic_keywords = ", ".join([word for word, prop in wp])
+                sent_topics_df = sent_topics_df.append(
+                    pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]),
+                    ignore_index=True,
+                )
+
+                topic_blob[doc_counter]["topics"] = topic_keywords.split(", ")
+
+                # topic_keywords
+                doc_counter += 1
+            else:
+                break
+    sent_topics_df.columns = ["Dominant_Topic", "Perc_Contribution", "Topic_Keywords"]
+    return sent_topics_df
 
 
 def do_topic_modeling(
@@ -145,49 +182,23 @@ def do_topic_modeling(
     corpus_tfidf = tfidf[corpus]
     lsi_model = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=num_topics)
 
-    # TODO: do we need this?
     # initialize an LSI transformation
     corpus_lsi = lsi_model[
         corpus_tfidf
     ]  # create a double wrapper over the original corpus: bow->tfidf->fold-in-lsi
 
-    # print("Model done")
     topic_blob = {}
-    i = 0
-    # doc_list = []
+    lsi_model.print_topics()
+    counter = 0
     for doc, as_text in zip(corpus_lsi, documents):
-        topic_blob[i] = {}
-        topic_blob[i]["doc"] = doc_keys[as_text]
-        i += 1
-        # print(doc,as_text)
-        # print(doc_keys[as_text])
-        # doc_list.append(doc_keys[as_text])
-
-    # topicResp["docs"] = doc_list
-
-    lda_topics = lsi_model.show_topics(num_words=num_words)
-    topics = {}
-    filters = [lambda x: x.lower(), strip_punctuation, strip_numeric]
-
-    for topic in lda_topics:
-        try:
-            print(topic)
-        except Exception as error:
-            print(error)
-        try:
-            topic_name = str(preprocess_string(topic[1], filters))
-        except Exception as error:
-            print(error)
-            topic_name = str(topic[1])
-
-        topics[topic_name] = int(topic[0])
-        topic_blob[int(topic[0])]["topics"] = topic_name
-
-    topicResp["topics"] = topics
-    print(topic_blob)
+        topic_blob[counter] = {}
+        topic_blob[counter]["doc"] = doc_keys[as_text]
+        counter += 1
 
     index = similarities.MatrixSimilarity(lsi_model[corpus])
     topicResp["sims"] = index
+
+    format_topics_sentences_lsi(lsi_model, corpus, topic_blob)
 
     topicResp["topic_blobs"] = topic_blob
 

@@ -15,35 +15,31 @@ wiki_pages = [
 ]
 
 
-wiki_pages = ["Facebook", "New York City", "Barack Obama"]
+def main():
+    texts = []
+    for page in wiki_pages:
+        text = wikipedia.summary(page)
+        # print(text)
+        texts.append(text)
 
-texts = []
-for page in wiki_pages:
-    text = wikipedia.summary(page)
-    # print(text)
-    texts.append(text)
+    tb = TopicBlob(texts, 5, 5)
+
+    print("#################Sims EXAMPLE##################")
+    print("Showing sim docs for doc number 0 *Facebook")
+    sims = tb.get_sim(0)
+    for sim in sims.keys():
+        print(tb.get_doc(sim))
+
+    print("#################Ranked Search EXAMPLE##################")
+    print("Doing ranked search for the word 'president'")
+    search = tb.ranked_search_docs_by_words("president")
+    print(search)
+
+    print("#################Topic Search EXAMPLE##################")
+    print("Doing topic search for the word 'social'")
+    topic_search = tb.search_docs_by_topics("social")
+    print(topic_search)
 
 
-tb = TopicBlob(texts, 20, 50)
-
-
-# Do topic search for social
-
-topic_search = tb.search_docs_by_topics("social")
-print(topic_search)
-print("\n")
-
-
-# Do a ranked search for president
-search = tb.ranked_search_docs_by_words("president")
-print(search)
-print("\n")
-
-# Find similar text for
-
-print("Finding similar document for\n" + tb.blobs[0]["doc"])
-print("\n")
-sims = tb.get_sim(0)
-
-for sim in sims.keys():
-    print(tb.get_doc(sim))
+if __name__ == "__main__":
+    main()

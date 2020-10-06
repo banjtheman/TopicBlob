@@ -8,7 +8,13 @@ from .gensim_topic_modeling import topic_search
 
 
 class TopicBlob:
-    def __init__(self, docs: List[str], num_topics: int, num_words: int, extra_stop_words: List[str] = None):
+    def __init__(
+        self,
+        docs: List[str],
+        num_topics: int,
+        num_words: int,
+        extra_stop_words: List[str] = None,
+    ):
         try:
             topicResp = do_topic_modeling(docs, num_topics, num_words, extra_stop_words)
         except Exception as error:
