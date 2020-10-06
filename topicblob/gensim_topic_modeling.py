@@ -72,11 +72,10 @@ def ranked_search(query: str, blobs: dict):
     corpus_docs = [blob["doc"] for blob in blobs.values()]
     tokenized_corpus = [doc.split() for doc in corpus_docs]
 
-    corpus_docs = []
-    #TODO: get whole topicblob obj?
-    for key in docs.keys():
-        corpus_docs.append(docs[key]["doc"])
-    print(corpus_docs)
+    # corpus_docs = []
+    # for key in docs.keys():
+    #     corpus_docs.append(docs[key]["doc"])
+    # print(corpus_docs)
 
     tokenized_corpus = [doc[0].split(" ") for doc in corpus_docs]
     # TODO: Add option for tokenizer
@@ -92,25 +91,6 @@ def ranked_search(query: str, blobs: dict):
     sorted_blobs = [blobs.get(i) for i in sorted_scores_index]
     return sorted_blobs
 
-    # print(bm25.get_top_n(tokenized_query, corpus_docs))
-    # counter = 0
-    # doc_scores = bm25.get_scores(tokenized_query)
-
-    # searchResp = {}
-    # for score in doc_scores:
-    #     searchResp[counter] = score
-    #     counter += 1
-
-    # # sort by highest
-    # sorted_scores = {
-    #     k: v
-    #     for k, v in sorted(searchResp.items(), reverse=True, key=lambda item: item[1])
-    # }
-
-    # return blob object
-
-    # return sorted_scores
-
 
 def get_sim_docs(doc, sims):
 
@@ -124,7 +104,9 @@ def get_sim_docs(doc, sims):
     return simResp
 
 
-def do_topic_modeling(docs: List[str], num_topics: int, num_words: int, extra_stop_words: List[str] = None):
+def do_topic_modeling(
+    docs: List[str], num_topics: int, num_words: int, extra_stop_words: List[str] = None
+):
 
     topicResp = {}
     documents = []
