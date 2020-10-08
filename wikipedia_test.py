@@ -1,9 +1,7 @@
 import wikipedia
 from topicblob import TopicBlob
 
-
 # get random wikipeida summaries
-
 wiki_pages = [
     "Facebook",
     "New York City",
@@ -24,17 +22,17 @@ def main():
 
     tb = TopicBlob(texts, 5, 5)
 
-    print("#################Sims EXAMPLE##################")
+    print("################# Sims EXAMPLE #################")
     print("Showing sim docs for doc number 0 *Facebook")
     sims = tb.get_sim(0)
     print(sims)
 
-    print("#################Ranked Search EXAMPLE##################")
+    print("################# Ranked Search EXAMPLE #################")
     print("Doing ranked search for the word 'president'")
     search = tb.ranked_search_docs_by_words("president")
     print(search)
 
-    print("#################Topic Search EXAMPLE##################")
+    print("################# Topic Search EXAMPLE #################")
     print("Doing topic search for the word 'python'")
     topic_search = tb.search_docs_by_topics("python")
     print(topic_search)

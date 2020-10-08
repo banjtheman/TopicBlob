@@ -47,11 +47,6 @@ def clean_text(text: str, my_stopwords: List[str], bigrams: bool = False) -> str
         word for word in text.split(" ") if word not in my_stopwords
     ]  # remove stopwords
 
-    # text_token_list = [word_rooter(word) if '#' not in word else word
-    #                     for word in text_token_list] # apply word rooter
-    # if bigrams:
-    #     text_token_list = text_token_list+[text_token_list[i]+'_'+text_token_list[i+1]
-    #                                         for i in range(len(text_token_list)-1)]
     text = " ".join(text_token_list)
     return text
 
@@ -87,10 +82,7 @@ def ranked_search(query: str, df: pd.DataFrame):
     # See https://github.com/dorianbrown/rank_bm25/blob/master/rank_bm25.py
     bm25 = BM25Okapi(tokenized_corpus)
 
-    # print(tokenized_corpus)
     tokenized_query = query.split()
-
-    # print(tokenized_query)
 
     # enumerate adds index of element in scores list
     doc_scores = bm25.get_scores(tokenized_query)
@@ -178,7 +170,6 @@ def do_topic_modeling(
         # TODO: find better way to store this data
         doc_keys[cleaned_doc] = doc
 
-    # stoplist = set('for a of the and to in'.split())
     texts = [
         [word for word in document.lower().split() if word not in my_stopwords]
         for document in documents
@@ -214,7 +205,7 @@ def do_topic_modeling(
         "Original Text",
     ]
 
-    tfidf = models.TfidfModel(corpus)  # step 1 -- initialize a model
+    tfidf = models.TfidfModel(corpus)
     corpus_tfidf = tfidf[corpus]
     lsi_model = models.LsiModel(corpus_tfidf, id2word=dictionary, num_topics=num_topics)
     index = similarities.MatrixSimilarity(lsi_model[corpus])

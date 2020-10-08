@@ -16,22 +16,22 @@ extra_stopwords = ["able"]
 def main():
     tb = TopicBlob(docs, 5, 5, extra_stopwords)
 
-    print("#################DOC EXAMPLE##################")
+    print("################# DOC EXAMPLE #################")
     print("Showing docs 0 and 1")
     print(tb.df.iloc[0])
     print(tb.df.iloc[1])
 
-    print("#################Sims EXAMPLE##################")
+    print("################# Sims EXAMPLE #################")
     print("Showing sim docs for doc number 0")
     sims = tb.get_sim(0)
     print(sims)
 
-    print("#################Ranked Search EXAMPLE##################")
+    print("################# Ranked Search EXAMPLE #################")
     print("Doing ranked search for the word 'with'")
     search = tb.ranked_search_docs_by_words("cells")
     print(search)
 
-    print("#################Topic Search EXAMPLE##################")
+    print("################# Topic Search EXAMPLE #################")
     print("Doing topic search for the word 'myeloid'")
     topic_search = tb.search_docs_by_topics("myeloid")
     print(topic_search)
