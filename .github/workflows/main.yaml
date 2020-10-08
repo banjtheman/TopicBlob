@@ -31,4 +31,5 @@ jobs:
           name: 'TopicBlob'
         env:
           GITHUB_ACCESS_TOKEN: " ${{ secrets.HABITS_NEW }}"
+          DO_RC: "ON"
           #GITHUB_ACCESS_TOKEN: " ${{ secrets.GITHUB_TOKEN }}"
