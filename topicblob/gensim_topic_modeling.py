@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 
 
-def compile_list_of_stopwords(extra: List[str] = None):
+def compile_list_of_stopwords(extra: List[str] = None) -> list:
     my_stopwords = nltk.corpus.stopwords.words("english")
     my_stopwords.extend(get_stop_words("english"))
     # If a list of extra stopwords is passed in, extend the list.
@@ -38,7 +38,7 @@ def compile_list_of_stopwords(extra: List[str] = None):
 
 # TODO have uses pass in thier own clean function?
 # cleaning master function
-def clean_text(text: str, my_stopwords: List[str], bigrams: bool = False):
+def clean_text(text: str, my_stopwords: List[str], bigrams: bool = False) -> str:
     text = text.lower()  # lower case
     text = re.sub("[" + my_punctuation + "]+", " ", text)  # strip punctuation
     text = re.sub("\s+", " ", text)  # remove double spacing
@@ -56,7 +56,7 @@ def clean_text(text: str, my_stopwords: List[str], bigrams: bool = False):
     return text
 
 
-def check_topic_set(row, topic_list):
+def check_topic_set(row, topic_list: set) -> bool:
     topic_set = set(row["Topics"])
     if topic_list.intersection(topic_set):
         return True
@@ -64,7 +64,7 @@ def check_topic_set(row, topic_list):
         return False
 
 
-def topic_search(df, topics):
+def topic_search(df: pd.DataFrame, topics: str) -> pd.DataFrame:
     topic_list = set(topics.split(" "))
     df_mask = df.apply(lambda row: check_topic_set(row, topic_list), axis=1)
     df = df[df_mask]
@@ -154,7 +154,7 @@ def format_topics_sentences(ldamodel, corpus, texts, og_docs):
 
 def do_topic_modeling(
     docs: List[str], num_topics: int, num_words: int, extra_stop_words: List[str] = None
-):
+) -> dict:
 
     topicResp = {}
     documents = []

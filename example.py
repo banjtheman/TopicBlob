@@ -25,8 +25,6 @@ def main():
     print("Showing sim docs for doc number 0")
     sims = tb.get_sim(0)
     print(sims)
-    # for sim in sims.keys():
-    #     print(tb.get_doc(sim))
 
     print("#################Ranked Search EXAMPLE##################")
     print("Doing ranked search for the word 'with'")
