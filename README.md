@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
 ```  
 
-TopicBlob leverages  `NLTK` and `gensim` , for the heavy lifting
+TopicBlob leverages  `NLTK`, `pandas`, and `gensim` , for the heavy lifting
 
 Features
 --------
