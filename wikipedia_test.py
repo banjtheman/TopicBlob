@@ -22,7 +22,15 @@ def main():
         # print(text)
         texts.append(text)
 
-    tb = TopicBlob(texts, 5, 5)
+    tb = TopicBlob(texts, 20, 20)
+
+    counter = 0 
+    for page in wiki_pages:
+
+        print("Stats for "+page)
+        print(tb.df.iloc[counter])
+        counter += 1
+        print("")
 
     print("#################Sims EXAMPLE##################")
     print("Showing sim docs for doc number 0 *Facebook")
