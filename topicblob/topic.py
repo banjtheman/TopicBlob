@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 
 
 import pandas as pd # type: ignore
-from .gensim_topic_modeling import do_topic_modeling
+from .gensim_topic_modeling import do_topic_modeling, download_stop_words
 from .gensim_topic_modeling import get_sim_docs
 from .gensim_topic_modeling import ranked_search
 from .gensim_topic_modeling import topic_search
@@ -18,6 +18,7 @@ class TopicBlob:
         extra_stop_words: List[str] = None,
     ):
         try:
+            download_stop_words()
             topicResp = do_topic_modeling(docs, num_topics, num_words, extra_stop_words)
         except Exception as error:
             logging.error(error)

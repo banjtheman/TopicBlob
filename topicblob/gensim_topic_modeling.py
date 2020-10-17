@@ -1,30 +1,32 @@
 import logging
 import re
-from collections import defaultdict
-from typing import List
 from pprint import pprint
-import pandas as pd
-from rank_bm25 import BM25Okapi
+from typing import List
+import ssl
 import nltk
+import pandas as pd
 from gensim import corpora
 from gensim import models
 from gensim import similarities
-
-from gensim.parsing.preprocessing import (
-    preprocess_string,
-    strip_punctuation,
-    strip_numeric,
-)
-
+from rank_bm25 import BM25Okapi
 from stop_words import get_stop_words
-from operator import itemgetter
-
 
 word_rooter = nltk.stem.snowball.PorterStemmer(ignore_stopwords=False).stem
 my_punctuation = "#!\"$%&'()*+,-./:;<=>?[\\]^_`{|}~•@“…ə"
 logging.basicConfig(
     format="%(asctime)s : %(levelname)s : %(message)s", level=logging.INFO
 )
+
+
+def download_stop_words():
+    try:
+        _create_unverified_https_context = ssl._create_unverified_context
+    except AttributeError:
+        pass
+    else:
+        ssl._create_default_https_context = _create_unverified_https_context
+
+    nltk.download('stopwords')
 
 
 def compile_list_of_stopwords(extra: List[str] = None) -> list:
