@@ -3,3 +3,4 @@ nltk
 rank_bm25
 stop-words
 pandas
+wikipedia
