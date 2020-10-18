@@ -90,7 +90,7 @@ def ranked_search(query: str, df: pd.DataFrame):
     bm25 = BM25Okapi(tokenized_corpus)
 
     # print(tokenized_corpus)
-    tokenized_query = query.split()
+    tokenized_query = query.lower().split()
 
     # print(tokenized_query)
 
