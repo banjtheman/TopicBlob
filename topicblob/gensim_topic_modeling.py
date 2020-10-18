@@ -79,9 +79,9 @@ def add_ranked_score(row, doc_scores):
 
 
 def ranked_search(query: str, df: pd.DataFrame):
-    corpus_docs = list(
-        df["Original Text"]
-    )  # [df["Cleaned Text"] for blob in blobs.values()]
+    corpus_docs = [
+        text.lower() for text in df["Original Text"]
+    ]  # [df["Cleaned Text"] for blob in blobs.values()]
 
     tokenized_corpus = [doc.split() for doc in corpus_docs]
     # tokenized_corpus = [doc[0].split(" ") for doc in corpus_docs]
@@ -90,7 +90,7 @@ def ranked_search(query: str, df: pd.DataFrame):
     bm25 = BM25Okapi(tokenized_corpus)
 
     # print(tokenized_corpus)
-    tokenized_query = query.split()
+    tokenized_query = query.lower().split()
 
     # print(tokenized_query)
 
