@@ -1,5 +1,9 @@
 import pytest
 
+@pytest.fixture(scope="module", autouse=True)
+def download_ntlk_assets():
+    import nltk
+    nltk.download('stopwords')
 
 @pytest.fixture
 def docs():
