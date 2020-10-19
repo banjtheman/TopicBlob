@@ -31,4 +31,12 @@ Requirements
 
 - Python  >= 3.5
 
+Docker Setup
+------------
+
+- Ensure you have (docker)[https://www.docker.com/] installed locally.
+- Build local Docker Image
+    `docker build -t topicblob:local .`
+- Run App (Simply runs the `example.py` module)
+    `docker run topicblob:local`
 
