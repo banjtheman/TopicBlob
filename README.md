@@ -22,9 +22,7 @@ Features
 
 Get it now
 ----------
-    #TODO push to pip
-    $ git clone https://github.com/banjtheman/TopicBlob/
-    $ pip install --editable . 
+    $ pip install topicblob 
 
 Requirements
 ------------

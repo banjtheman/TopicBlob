@@ -165,7 +165,7 @@ def main():
 
     setup(
         author="Banjo Obayomi",
-        author_email="ba",
+        author_email="banjtheman@gmail.com",
         classifiers=[
             "Development Status :: 5 - Production/Stable",
             "Intended Audience :: Developers",
