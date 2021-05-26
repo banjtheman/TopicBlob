@@ -46,7 +46,7 @@ def get_requirements_from_file(python_requirements_file="./requirements.txt"):
             the library
     """
 
-    requirements = []
+    requirements = (get_requirements_from_file())
     with open(python_requirements_file) as requirements_file:
         requirement = requirements_file.readline()
         while requirement:
