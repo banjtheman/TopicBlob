@@ -3,7 +3,7 @@ TopicBlob: Simplified Topic Modeling
 ====================================
 
 
-`TopicBlob` is a Python 3 library for processing textual data. It provides a simple API for diving into common natural language processing (NLP) taks around topic modeling such as finding similar documents and provide a list of topics givne input text.
+`TopicBlob` is a Python 3 library for processing textual data. It provides a simple API for diving into common natural language processing (NLP) tasks around topic modeling such as finding similar documents and provide a list of topics given input text.
 
 
 Here is a live demo of TopicBlob working on wikipedia pages  
