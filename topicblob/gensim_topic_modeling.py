@@ -26,7 +26,7 @@ def download_stop_words():
     else:
         ssl._create_default_https_context = _create_unverified_https_context
 
-    nltk.download('stopwords')
+    nltk.download("stopwords")
 
 
 def compile_list_of_stopwords(extra: List[str] = None) -> list:
@@ -44,7 +44,7 @@ def clean_text(text: str, my_stopwords: List[str], bigrams: bool = False) -> str
     text = text.lower()  # lower case
     text = re.sub("[" + my_punctuation + "]+", " ", text)  # strip punctuation
     text = re.sub("\s+", " ", text)  # remove double spacing
-    # text = re.sub('([0-9]+)', '', text) # remove numbers
+    text = re.sub("([0-9]+)", "", text)  # remove numbers
     text_token_list = [
         word for word in text.split(" ") if word not in my_stopwords
     ]  # remove stopwords

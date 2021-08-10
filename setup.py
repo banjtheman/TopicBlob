@@ -46,7 +46,7 @@ def get_requirements_from_file(python_requirements_file="./requirements.txt"):
             the library
     """
 
-    requirements = (get_requirements_from_file())
+    requirements = get_requirements_from_file()
     with open(python_requirements_file) as requirements_file:
         requirement = requirements_file.readline()
         while requirement:
@@ -153,8 +153,11 @@ def main():
     test_packages = [package for package in packages if package.endswith(".tests")]
 
     # Get Requirements and Requirments Installation Details
-    install_requirements = get_requirements_from_packages(install_packages)
+    # install_requirements = get_requirements_from_packages(install_packages)
+    install_requirements = ["nltk", "rank_bm25", "stop-words", "pandas", "wikipedia"]
+
     test_requirements = get_requirements_from_packages(test_packages)
+
     setup_requirements = ["pytest-runner", "pytest", "pytest-cov", "pytest-html"]
 
     # Get Dependency Links For Each Requirement (As Necessary)
