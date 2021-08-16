@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, List
 
 
-import pandas as pd # type: ignore
+import pandas as pd  # type: ignore
 from .gensim_topic_modeling import do_topic_modeling, download_stop_words
 from .gensim_topic_modeling import get_sim_docs
 from .gensim_topic_modeling import ranked_search
@@ -25,6 +25,7 @@ class TopicBlob:
 
         self.df = topicResp["df"]
         self.sims = topicResp["sims"]
+        self.topics = topicResp["topics"]
 
     def get_sim(self, doc_index: int) -> pd.DataFrame:
         return get_sim_docs(doc_index, self.sims, self.df)
@@ -37,3 +38,6 @@ class TopicBlob:
 
     def ranked_search_docs_by_words(self, words: str) -> pd.DataFrame:
         return ranked_search(words, self.df)
+
+    def show_topics(self) -> List[Any]:
+        return self.topics
