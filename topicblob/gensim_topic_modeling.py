@@ -223,6 +223,9 @@ def do_topic_modeling(
 
     topicResp["sims"] = index
     topicResp["df"] = df_dominant_topic
+    topicResp["topics"] = lda_model.show_topics(
+        num_topics=num_topics, num_words=num_words
+    )
 
     # TODO how do we want to handle saves?
     # with open(".topicblob/topics.json", "w") as outfile:
