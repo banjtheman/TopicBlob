@@ -144,7 +144,7 @@ def format_topics_sentences(ldamodel, corpus, texts, og_docs):
             topic_keywords = ", ".join([word for word, prop in wp])
             topic_keywords = topic_keywords.split(", ")
 
-            print(f"Percentage : {prop_topic}")
+            # print(f"Percentage : {prop_topic}")
             topic_list.append(int(topic_num))
             prop_list.append(float(round(prop_topic, 4)))
             topic_keyword_list.append(topic_keywords)
