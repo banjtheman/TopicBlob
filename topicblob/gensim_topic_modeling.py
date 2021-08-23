@@ -127,31 +127,51 @@ def get_sim_docs(doc, sims, df):
 def format_topics_sentences(ldamodel, corpus, texts, og_docs):
     # Init output
     sent_topics_df = pd.DataFrame()
+    topics_json = {}
 
     # Get main topic in each document
     for i, row_list in enumerate(ldamodel[corpus]):
         row = row_list[0] if ldamodel.per_word_topics else row_list
-        # print(row)
         row = sorted(row, key=lambda x: (x[1]), reverse=True)
         # Get the Dominant topic, Perc Contribution and Keywords for each document
+        topics_json[i] = {}
+        topic_list = []
+        prop_list = []
+        topic_keyword_list = []
         for j, (topic_num, prop_topic) in enumerate(row):
-            if j == 0:  # => dominant topic
-                wp = ldamodel.show_topic(topic_num)
-                topic_keywords = ", ".join([word for word, prop in wp])
-                topic_keywords = topic_keywords.split(", ")
+            # if j == 0:  # => dominant topic
+            wp = ldamodel.show_topic(topic_num)
+            topic_keywords = ", ".join([word for word, prop in wp])
+            topic_keywords = topic_keywords.split(", ")
+
+            print(f"Percentage : {prop_topic}")
+            topic_list.append(int(topic_num))
+            prop_list.append(float(round(prop_topic, 4)))
+            topic_keyword_list.append(topic_keywords)
+
+            if j == 0:
                 sent_topics_df = sent_topics_df.append(
                     pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]),
                     ignore_index=True,
                 )
-            else:
-                break
+
+        topics_json[i]["topic_list"] = topic_list
+        topics_json[i]["percentage_list"] = prop_list
+        topics_json[i]["topic_keyword_list"] = topic_keyword_list
+
+        # sent_topics_df = sent_topics_df.append(
+        #     pd.Series([int(topic_num), round(prop_topic, 4), topic_keywords]),
+        #     ignore_index=True,
+        # )
+            # else:
+            #     break
     sent_topics_df.columns = ["Dominant_Topic", "Perc_Contribution", "Topic_Keywords"]
 
     # Add original text to the end of the output
     contents = pd.Series(texts)
     og_docs_df = pd.Series(og_docs)
     sent_topics_df = pd.concat([sent_topics_df, contents, og_docs_df], axis=1)
-    return sent_topics_df
+    return sent_topics_df, topics_json
 
 
 def do_topic_modeling(
@@ -203,7 +223,7 @@ def do_topic_modeling(
     )
 
     pprint(lda_model.print_topics())
-    df_topic_sents_keywords = format_topics_sentences(
+    df_topic_sents_keywords, topics_json = format_topics_sentences(
         ldamodel=lda_model, corpus=corpus, texts=texts, og_docs=docs
     )
     df_dominant_topic = df_topic_sents_keywords.reset_index()
@@ -226,6 +246,7 @@ def do_topic_modeling(
     topicResp["topics"] = lda_model.show_topics(
         num_topics=num_topics, num_words=num_words
     )
+    topicResp["topics_json"] = topics_json
 
     # TODO how do we want to handle saves?
     # with open(".topicblob/topics.json", "w") as outfile:

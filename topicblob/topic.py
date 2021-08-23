@@ -26,6 +26,7 @@ class TopicBlob:
         self.df = topicResp["df"]
         self.sims = topicResp["sims"]
         self.topics = topicResp["topics"]
+        self.topics_json = topicResp["topics_json"]
 
     def get_sim(self, doc_index: int) -> pd.DataFrame:
         return get_sim_docs(doc_index, self.sims, self.df)
