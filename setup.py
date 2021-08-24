@@ -154,7 +154,7 @@ def main():
 
     # Get Requirements and Requirments Installation Details
     # install_requirements = get_requirements_from_packages(install_packages)
-    install_requirements = ["nltk", "rank_bm25", "stop-words", "pandas", "wikipedia"]
+    install_requirements = ["nltk", "rank_bm25", "stop-words", "pandas", "wikipedia", "python-Levenshtein", "gensim"]
 
     test_requirements = get_requirements_from_packages(test_packages)
 
