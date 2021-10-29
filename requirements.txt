@@ -5,3 +5,4 @@ stop-words
 pandas
 wikipedia
 pytest==6.1.1
+streamlit
