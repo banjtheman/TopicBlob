@@ -16,6 +16,12 @@ extra_stopwords = ["able"]
 def main():
     tb = TopicBlob(docs, 5, 5, extra_stopwords)
 
+    # Show topics for each doc
+    print("Each topic")
+    print(tb.df.iloc[0]["Topics"])
+    print(tb.df.iloc[1]["Topics"])
+    print(tb.df.iloc[2]["Topics"])
+
     print("#################DOC EXAMPLE##################")
     print("Showing docs 0 and 1")
     print(tb.df.iloc[0])

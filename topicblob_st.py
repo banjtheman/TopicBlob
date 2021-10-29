@@ -10,8 +10,7 @@ from streamlit import caching
 
 
 wiki_pages_default = [
-    "Facebook",
-    "New York City",
+    "Facebook(Company)",
     "Barack Obama",
     "Wikipedia",
     "Topic Modeling",
@@ -24,8 +23,7 @@ wiki_pages_default = [
 def cache_wiki_pages():
 
     wiki_pages = [
-        "Facebook",
-        "New York City",
+        "Facebook(Company)",
         "Barack Obama",
         "Wikipedia",
         "Topic Modeling",
@@ -138,7 +136,7 @@ def main():
     counter = 0
     for page in wiki_pages:
 
-        expander = st.beta_expander(page)
+        expander = st.expander(page)
         curr_text = tb.df.iloc[counter]["Original Text"]
         topics = tb.df.iloc[counter]["Topics"]
 
