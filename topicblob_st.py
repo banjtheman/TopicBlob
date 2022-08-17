@@ -6,9 +6,6 @@ import streamlit as st
 import pandas as pd
 from topicblob import TopicBlob
 
-from streamlit import caching
-
-
 wiki_pages_default = [
     "Facebook(Company)",
     "Barack Obama",
@@ -40,8 +37,6 @@ def update_wiki_pages(new_pages):
 
 
 # Default pages
-
-
 def select_wiki_pages():
     wiki_pages = cache_wiki_pages()
 
@@ -55,7 +50,6 @@ def select_wiki_pages():
 
     st.subheader("Reset list to defaults")
     if st.button("Reset list"):
-        caching.clear_cache()
         wiki_pages = wiki_pages_default
 
     st.subheader("Selected wikipedia pages")
